@@ -1,1 +1,258 @@
+# AI Log
+
+
+
+Mujhe college ke liye ek AV Room Management System banana hai. AV room me DSLR cameras, projectors, microphones, tripods, speakers aur laptops jaise equipment hain. Abhi paper register use hota hai jisse double booking, equipment availability, late return aur deposit tracking jaise problems hoti hain.
+
+Please help me understand the requirements and suggest a proper way to build this project.
+
+
+
+I want to build the project using React + TypeScript + Vite for frontend, Node.js + Express + TypeScript for backend and MySQL with Prisma for database. JWT authentication bhi use karni hai.
+
+Please suggest the project structure and tell me how frontend, backend and database will communicate.
+
+
+
+Database ka proper schema bana do. Mujhe Student and Admin users, equipment, individual equipment units, loans, deposits, notifications and returns sab manage karna hai.
+Ek equipment ke multiple physical units ho sakte hain, jaise 3 projectors. Isliye individual asset code aur serial number bhi track karna hai.
+Please create the Prisma schema with proper relationships and enums.
+
+
+
+Mujhe availability ka logic samjhao aur implement karo.
+
+For example, agar 3 projectors hain aur 2 already borrowed hain, to available quantity 1 honi chahiye.
+
+User available quantity se zyada equipment request nahi kar sake.
+
+Date-based booking ke case me overlapping bookings bhi prevent karni hain.
+
+
+Ek borrowing limit bhi add karo. Requirement ye hai ki ek student ke paas maximum 5 active equipment units ho sakte hain.
+
+Approval se pehle check karo:
+
+Current active units + requested units
+
+Agar 5 se zyada ho raha hai to request reject honi chahiye.
+
+Ab return functionality implement karo aur late fee calculate karo.
+
+Late fee sirf due date ke baad return karne par lagegi.
+
+Use:
+
+Late Days = max(0, Actual Return Date - Due Date)
+
+Late Fee = Late Days × Late Fee Per Day
+
+Early ya on-time return par late fee nahi lagni chahiye.
+
+
+
+Deposit ka bhi proper logic add karo.
+
+Equipment return hone ke baad late fee deposit se deduct hogi.
+
+Refund Amount = max(0, Deposit Amount - Late Fee)
+
+Deposit amount, late fee, refundable amount aur refund status database me track hona chahiye.
+
+
+Ek important twist hai jo problem statement me diya hai:
+
+"The solution must also allow an active loan to be transferred from one borrower to another — the original due date carries over unchanged, and the item’s availability is unaffected by the transfer."
+
+Is requirement ko existing system me properly implement karo.
+
+
+
+Loan transfer ko thoda carefully implement karo.
+
+Agar Student A ke paas active loan hai aur usko Student B ko transfer karna hai, to new loan create nahi hona chahiye.
+
+Existing loan ka borrower change hona chahiye.
+
+Loan ID, equipment, quantity, booking date, borrow date, due date, status, LoanUnit aur financial/deposit history same rehni chahiye.
+
+Physical equipment ko release ya available mat karna.
+
+
+
+Transfer ke time availability bilkul change nahi honi chahiye.
+
+Example:
+
+3 projectors hain.
+
+2 borrowed hain.
+
+Agar unme se ek active loan Student A se Student B ko transfer hota hai, to equipment abhi bhi borrowed hai.
+
+Isliye availability transfer se pehle aur baad same honi chahiye.
+
+
+Due date bhi same rehni chahiye.
+
+For example:
+
+Student A → Student B
+
+Original due date = 20 September
+
+Transfer ke baad due date 20 September hi rehni chahiye.
+
+Transfer ko new borrowing ya new booking ki tarah treat mat karna.
+
+
+
+Loan transfer ka audit history bhi chahiye.
+
+LoanTransfer naam ka model create karo jisme loanId, fromBorrowerId, toBorrowerId, transferredAt, transferredById aur optional reason store ho.
+
+Har successful transfer ka ek audit record create hona chahiye.
+
+Transfer ke liye API bhi bana do.
+
+POST /api/loans/:loanId/transfer
+
+Request body me newBorrowerId aur optional reason hoga.
+
+Authentication, authorization, loan existence, ACTIVE status, new borrower existence, same borrower validation aur borrowing limit check karo.
+
+
+
+Transfer sirf authorized user, preferably ADMIN, kar sake.
+
+Backend me validation zaroor rakhna. Sirf frontend validation par depend mat karna.
+
+Transfer ke important database changes transaction ke andar perform karo taaki database inconsistent state me na rahe.
+
+Ab loan transfer ke test cases run karo.
+
+Missing token check karo.
+
+Non-active loan transfer check karo.
+
+Same borrower ko transfer check karo.
+
+Non-existing borrower check karo.
+
+Valid transfer check karo.
+
+Valid transfer ke baad verify karo ki borrower change hua hai, due date same hai, loan ACTIVE hai, availability same hai aur LoanTransfer audit record create hua hai.
+
+Frontend aur backend build bhi check karo.
+
+
+Maine MySQL Workbench me database check kiya but LoanTransfer table dikh nahi rahi hai.
+
+Please check karo ki Prisma schema me LoanTransfer model hai ya nahi, migration pending hai ya nahi, aur database me migration apply hui hai ya nahi.
+
+Existing data ko reset ya delete mat karna.
+
+
+
+Migration apply karne ke baad verify karo ki av_room_db database me LoanTransfer table aa gayi hai.
+
+Prisma Client regenerate karo aur frontend/backend build bhi verify karo.
+
+
+
+Ab project ko GitHub par upload karna hai.
+
+Pehle proper .gitignore create karo.
+
+Make sure ye files/folders commit na hon:
+
+node_modules/
+dist/
+build/
+.env
+.env.*
+*.log
+
+Actual .env me database credentials aur secret values hain, isliye usko GitHub par upload nahi karna hai.
+
+
+
+Git repository initialize karo, project files add karo aur initial commit create karo.
+
+Main branch use karni hai.
+
+
+Mere existing GitHub repository se local project connect karo:
+
+https://github.com/Sadhanapatidar001/Auriga.git
+
+Main branch ko target branch rakho.
+
+---
+
+Push karne se pehle check karo ki .env aur node_modules tracked nahi hain.
+
+Make sure frontend, backend, Prisma schema, migrations aur source files Git me included hain.
+
+
+Ek baar complete project ka final verification kar do.
+
+Check:
+
+Frontend build
+
+Backend build
+
+Prisma schema
+
+Database migrations
+
+Authentication
+
+Borrowing
+
+Availability
+
+Returns
+
+Late fee
+
+Deposits/refunds
+
+Borrowing limit
+
+Loan transfer
+
+Loan transfer ke baad due date unchanged
+
+Loan transfer ke baad availability unchanged
+
+LoanTransfer audit record
+
+.env not committed
+
+node_modules not committed
+
+Kisi bhi existing project data ko reset ya delete mat karna.
+
+
+GitHub push karte time issue aa raha hai. Directly project ko GitHub repository me push karne ka safe method batao.
+
+
+
+Push command run kiya but terminal me koi output nahi aa raha hai. Please batao kya check karna hai aur project files ko safely GitHub par kaise push karun.
+
+
+
+I also need a README.md for the project.
+
+README me project overview, features, tech stack, project structure, database entities, loan transfer functionality, installation steps, environment variables aur basic workflow explain karo.
+
+Actual .env credentials README me include mat karna.
+
+
+
+I also need an AI_LOG.md file because the project was developed with AI assistance.
+
+Mujhe relevant development prompts ka record chahiye jisse clearly show ho ki AI ka use requirements samajhne, database design, implementation, testing, debugging aur GitHub setup ke liye kiya gaya tha.
 
